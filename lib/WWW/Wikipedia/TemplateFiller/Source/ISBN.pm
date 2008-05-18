@@ -1,0 +1,95 @@
+package WWW::Wikipedia::TemplateFiller::Source::ISBN;
+use base 'WWW::Wikipedia::TemplateFiller::Source';
+
+use warnings;
+use strict;
+
+use WWW::Scraper::ISBN;
+use WWW::Mechanize;
+use Tie::IxHash;
+use Carp;
+
+sub new {
+  my( $pkg, %attrs ) = @_;
+  $attrs{__scraper} = new WWW::Scraper::ISBN();
+  $attrs{__mech} = new WWW::Mechanize();
+  $attrs{__scraper}->drivers('ISBNdb');
+
+  # Remember to set $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY in WebApp!
+
+  return bless \%attrs, $pkg;
+}
+
+sub __scraper { shift->{__scraper} }
+sub __mech { shift->{__mech} }
+
+sub get {
+  my( $self, $isbn ) = @_;
+  $isbn =~ s/[^0-9X]//gi;
+
+  my $search = eval { $self->__scraper->search($isbn) };
+  return undef unless $search and $search->found;
+
+  my $book = $search->book;
+
+  $isbn = $book->{isbn};
+  $self->__mech->get('http://isbn.org/converterpub.asp');
+  $self->__mech->submit_form(
+    form_name => 'frmconvert',
+    fields => {
+      txtisbn10 => ( $isbn && length($isbn) == 10 ? $isbn : '' ),
+      txtisbn13 => ( $isbn && length($isbn) == 13 ? $isbn : '' )
+    }
+  );
+  $self->__mech->form_name('frmconvert');
+  $isbn = $self->__mech->value('txtisbn10') || $self->__mech->value('txtisbn13') || $isbn;
+
+  return $self->__source_obj( {
+    __source_url => $book->{_source_url},
+    -author => $book->{author},
+    -title => $book->{title},
+    -publisher => $book->{publisher},
+    -location => $book->{location},
+    -year => $book->{year},
+    -pages => '',
+
+    # New fields (removed 'id')
+    -isbn => $isbn,
+    -oclc => '',
+    -doi => '',
+    
+    -accessdate => '',
+  } );
+}
+
+sub template_name { 'cite book' }
+sub template_ref_name { 'isbn'.shift->{isbn} }
+sub template_basic_fields {
+  my $self = shift;
+
+  tie( my %fields, 'Tie::IxHash' );
+  %fields = (
+    -author    => $self->{author},
+   '+authorlink' => '',
+   '+editor'   => '',
+   '+others'   => '',
+    -title     => $self->{title},
+   '+edition'  => '',
+   '+language' => '',
+    -publisher => $self->{publisher},
+    -location  => $self->{location},
+    -year      => $self->{year},
+   '+origyear' => '',
+    -pages     => '',
+   '+quote'    => '',
+    -isbn      => $self->{isbn},
+    -oclc      => '',
+    -doi       => '',
+   '+url'      => '',
+   -accessdate => '',
+  );
+
+  return \%fields;
+}
+
+1;
