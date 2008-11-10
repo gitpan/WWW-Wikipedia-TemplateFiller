@@ -16,6 +16,7 @@ sub new {
   $attrs{__scraper}->drivers('ISBNdb');
 
   # Remember to set $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY in WebApp!
+  $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY = $attrs{isbndb_access_key} or die "no access key provided";
 
   return bless \%attrs, $pkg;
 }

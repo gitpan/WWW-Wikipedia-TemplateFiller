@@ -5,7 +5,6 @@ use warnings;
 use strict;
 
 use Tie::IxHash;
-use Data::Dump 'dump';
 
 sub search_class { 'DrugBank' }
 

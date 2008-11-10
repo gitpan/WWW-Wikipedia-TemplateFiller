@@ -6,6 +6,7 @@ use strict;
 
 use WWW::Mechanize;
 use Tie::IxHash;
+use URI;
 
 sub new {
   my( $pkg, %attrs ) = @_;
@@ -22,7 +23,7 @@ sub get {
 
   return $self->__source_obj( {
     url => $url,
-    title => $self->__mech->title,
+    title => $self->__mech->title || URI->new( $url )->host || '',
   } );
 }
 
@@ -31,12 +32,12 @@ sub template_ref_name { 'url'.shift->{title} }
 sub template_basic_fields {
   my $self = shift;
 
-  ( my $url_enc = $self->{url} ) =~ s/\s/+/g;
+  ( my $url_enc = $self->{url} ) =~ s/\s/+/g;  
 
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
     -url => $url_enc,
-    -title => $self->{title} || '',
+    -title => $self->{title},
     '+author' => '',
     '+authorlink' => '',
     '+coauthors' => '',

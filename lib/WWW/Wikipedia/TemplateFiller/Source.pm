@@ -8,12 +8,20 @@ use strict;
 
 use Date::Calc;
 use XML::Writer;
+use HTML::Entities;
 use Tie::IxHash;
 use Carp;
 
 =head1 NAME
 
-WWW::Wikipedia::TemplateFiller::Source - data source
+WWW::Wikipedia::TemplateFiller::Source - Base class for data sources
+
+=head1 DESCRIPTION
+
+This is an internal base class from which data source classes
+inherit. From an end-user perspective, there is unlikely any reason to
+know anything about this module. That said, feel free to poke
+around. :-)
 
 =head1 METHODS
 
@@ -21,7 +29,8 @@ WWW::Wikipedia::TemplateFiller::Source - data source
 
   my $source = new WWW::Wikipedia::TemplateFiller::Source( filler => $filler, %attrs );
 
-Create a new source object with the given filler.
+Create a new source object with the given filler and attributes
+C<%attrs>.
 
 =cut
 
@@ -37,12 +46,20 @@ sub new {
   return $self;
 }
 
-=head2 _search
+sub __result_from_cache { }
+sub __result_to_cache { }
 
-  my $search = $source->_search;
+sub __cache_key {
+  my( $self, $id ) = @_;
+  return $self->type.'-'.$id;
+}
 
-Internal method. Returns the L<WWW::Search> object used by this source
-class. Only useful for source subclasses that define a
+=head2 _search_obj
+
+  my $search = $source->_search_obj;
+
+(Internal method.) Returns the L<WWW::Search> object used by this
+source class. Only useful for source subclasses that define a
 C<search_class()> class method, which defines the L<WWW::Search>
 module to be used for backend searches.
 
@@ -54,19 +71,28 @@ sub _search_obj { shift->{__search} }
 
   my $result = $source->_search($id);
 
-Internal method. Performs a basic L<WWW::Search> search. Only useful
+(Internal method.) Performs a basic L<WWW::Search> search. Only useful
 for source subclasses that define a C<search_class()> class
-method. Exactly the same as:
+method. Essentially the same as:
 
   $source->_search->native_query($id);
   return $source->_search->next_result;
+
+except that a cache may be used internally to speed things up.
 
 =cut
 
 sub _search {
   my( $self, $id ) = @_;
-  $self->_search_obj->native_query($id);
-  return $self->_search_obj->next_result;
+
+  my $result = $self->__result_from_cache( $id );
+  if( not $result ) {
+    $self->_search_obj->native_query($id);
+    $result = $self->_search_obj->next_result;
+    $self->__result_to_cache( $id => $result );
+  }
+
+  return $result;
 }
 
 =head2 template_name
@@ -74,7 +100,7 @@ sub _search {
 Class method only; used by source classes to define the title of the
 template they will be populating. Example for PubmedId source:
 
-  sub template_name { 'CiteJournal' }
+  sub template_name { 'cite journal' }
 
 =cut
 
@@ -177,6 +203,7 @@ sub output {
 
   my @pairs = ( );
   while( my( $param, $info ) = each %params ) {
+    $info->{show} ||= '';
     next if $info->{show} eq 'show_if_filled' and !defined($info->{value});
     next if $info->{show} eq 'show_if_extended' and !$show_extended;
 
@@ -223,6 +250,8 @@ sub output {
 
     return $output;
   }
+
+  $citation = encode_entities( $citation ) if $args{encode_entities};
 
   return $citation;
 }
@@ -337,7 +366,7 @@ L<http://search.cpan.org/dist/WWW-Wikipedia-TemplateFiller-Source>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2008 David J. Iberri, all rights reserved.
+Copyright (c) David J. Iberri, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
@@ -345,4 +374,3 @@ under the same terms as Perl itself.
 =cut
 
 1;
-

@@ -3,6 +3,7 @@ cgi/templates/script.js
 cgi/templates/start.html
 cgi/templates/stylesheet.css
 Changes
+INSTALL
 MANIFEST
 META.yml # Will be created by "make dist"
 Makefile.PL
@@ -15,6 +16,7 @@ lib/WWW/Wikipedia/TemplateFiller/Source/HgncId.pm
 lib/WWW/Wikipedia/TemplateFiller/Source/ISBN.pm
 lib/WWW/Wikipedia/TemplateFiller/Source/PubchemId.pm
 lib/WWW/Wikipedia/TemplateFiller/Source/PubmedId.pm
+lib/WWW/Wikipedia/TemplateFiller/Source/PubmedcentralId.pm
 lib/WWW/Wikipedia/TemplateFiller/Source/URL.pm
 lib/WWW/Wikipedia/TemplateFiller/WebApp.pm
 t/00-load.t

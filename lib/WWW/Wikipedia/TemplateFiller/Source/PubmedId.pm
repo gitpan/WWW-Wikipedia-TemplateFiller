@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use Carp;
 
+use Date::Calc qw/ Month_to_Text Decode_Month /;
 use WWW::Search;
 use HTML::Entities;
 
@@ -32,11 +33,9 @@ sub get {
   my $lang = $article->{language_name} eq 'English' ? undef : $article->{language_name};
 
   my @authors = ref $article->{authors} ? @{ $article->{authors} } : ();
-  my $author_list;
+  my $author_list = join ', ', @authors;
   if( @authors > 6 and !$self->{dont_use_etal} ) {
     $author_list = join( ', ', @authors[0..2]) . ", ''et al''";
-  } else {
-    $author_list = join ', ', @authors;
   }
 
   for my $field ( qw/ title journal_abbreviation / ) {
@@ -63,6 +62,9 @@ sub template_basic_fields {
   my $ndash = decode_entities('&ndash;');
   $pages =~ s{\-}{$ndash}g;
 
+  my $month = Decode_Month( $self->{month} ) if $self->{month};
+     $month = Month_to_Text( $month ) if $month;
+
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
     -author  => $self->{author},
@@ -73,7 +75,9 @@ sub template_basic_fields {
     -issue   => $self->{issue},
     -pages   => $pages,
     -year    => $self->{year},
+     month   => $month,
     -pmid    => $self->{pmid},
+    pmc      => $self->{pmc_id},
   );
 
   my $doi = $self->{doi};

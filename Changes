@@ -1,5 +1,13 @@
-Revision history for WWW-Wikipedia-TemplateFiller
+# Revision history for WWW-Wikipedia-TemplateFiller
 
-0.01 2007-12-xx
-* Initial revision
+version: 0.02
+date:    2008-11-09
+changes:
+  - add description to README and TemplateFiller.pm
+  - bugfix: if title cannot be found for URL, the URL's host is used instead
+
+version: 0.01
+date:    2008-05-18
+changes:
+  - initial revision
 

@@ -2,7 +2,7 @@ package WWW::Wikipedia::TemplateFiller;
 use warnings;
 use strict;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use WWW::Search;
 use Cache::SizeAwareFileCache;
@@ -31,6 +31,22 @@ WWW::Wikipedia::TemplateFiller - Fill Wikipedia templates with your eyes closed
 
   # With output-time (mostly formatting) options
   print $source->output( vertical => 1, add_accessdate => 1 );
+
+=head1 DESCRIPTION
+
+This module generates Wikipedia template markup for various sources of
+information such as PubMed IDs, ISBNs, URLs, etc. While it works with
+multiple templates, it was predominantly created to lower the
+activation energy associated with filling out citation templates.
+
+In writing a Wikipedia article, one aims to cite sufficient
+references. The trouble is that there are many different ways of
+citing different sources, all with different Wikipedia citation
+templates, and many requiring information that may be difficult to
+obtain. The initial goal of this module was to streamline the process
+of generating citation templates. Sure, the module's grown and it's
+been generalized to other templates (Drugbox, etc.), but the
+principles persist.
 
 =head1 METHODS
 
@@ -76,19 +92,10 @@ L<WWW::Wikipedia::TemplateFiller::Source> for information.
 
 sub get {
   my( $self, $source_type, $id, %attrs ) = @_;
-
-  my $source = $self->__source_from_cache( $source_type, $id );
-  if( not $source ) {
-    my $source_class = $self->__load_class( source => $source_type );
-    $source = $source_class->new( %attrs, filler => $self )->get($id);
-    $self->__source_to_cache( $source_type, $id, $source );
-  }
-  
+  my $source_class = $self->__load_class( source => $source_type );
+  my $source = $source_class->new( %attrs, filler => $self )->get($id);
   return $self->{__source} = $source;
 }
-
-sub __source_from_cache { }
-sub __source_to_cache { }
 
 =head2 cache
 
@@ -104,6 +111,10 @@ sub __load_class {
   my( $pkg, $class_type, $which ) = @_;
 
   my @classes = $pkg->__to_classes( $class_type => $which );
+
+#  use Data::Dump 'dump';
+#  die dump \@classes if $which =~ /url/i;
+
   foreach my $class ( @classes ) {
     return $class if eval "use $class; 1" or $class->isa($pkg);
   }
@@ -119,6 +130,7 @@ sub __to_classes {
 
   my $template = ref($pkg).'::'.$class_type.'::%s';
   return (
+    sprintf( $template, $oneword ),
     $pkg->__type_to_std_class( source => $which ),
     sprintf( $template, uc($oneword) ),
     sprintf( $template, ucfirst($oneword) ),
@@ -173,11 +185,9 @@ L<http://search.cpan.org/dist/WWW-Wikipedia-TemplateFiller>
 
 =back
 
-=head1 ACKNOWLEDGEMENTS
-
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2008 David J. Iberri, all rights reserved.
+Copyright (c) David J. Iberri, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

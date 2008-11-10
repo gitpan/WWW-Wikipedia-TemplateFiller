@@ -2,34 +2,62 @@ package WWW::Wikipedia::TemplateFiller::WebApp;
 use base 'CGI::Application';
 
 use WWW::Wikipedia::TemplateFiller;
+use XML::Writer;
 use Tie::IxHash;
 
 # Access key for ISBNdb.com's API
-my $ISBNdb_Access_Key = 'J9M36CIE';
+my %config = (
+  isbndb_access_key => 'your_isbndb_access_key';
+);
+
+=head1 NAME
+
+WWW::Wikipedia::TemplateFiller::WebApp - Web interface to WWW::Wikipedia::TemplateFiller
+
+=head1 SYNOSPSIS
+
+  #!/usr/bin/perl
+  use WWW::Wikipedia::TemplateFiller::WebApp;
+
+  my $template_path = '/path/to/web/templates';
+  WWW::Wikipedia::TemplateFiller::WebApp->new( TMPL_PATH => $template_path )->run;
+
+=head1 DESCRIPTION
+
+This module provides a L<CGI::Application> interface to
+L<WWW::Wikipedia::TemplateFiller> so that the work of
+L<http://diberri.dyndns.org/cgi-bin/templatefiller/> can be
+distributed across multiple servers.
+
+Please see the included INSTALL file for detailed installation
+instructions.
+
+=head1 METHODS
 
 =head2 setup
 
-Sets up the app.
+Sets up the app for L<CGI::Application>.
 
 =cut
 
 sub setup {
   my $self = shift;
   $self->mode_param('f');
-  $self->start_mode('form');
+  $self->start_mode('view');
   $self->run_modes(
-    form => 'make_form',
+    view => 'view_page',
   );
   $self->header_add( -charset => 'utf-8' );
 }
 
-=head2 make_form
+=head2 view_page
 
-Makes the page.
+Method corresponding to the C<view> run mode, which constructs both
+the input form and the results page.
 
 =cut
 
-sub make_form {
+sub view_page {
   my $self = shift;
   my $q = $self->query;
   my %params = $self->query_params;
@@ -46,13 +74,17 @@ sub make_form {
   my( $filler, $source, $template_markup );
   my $source_url = '';
   if( $type and $id ) {
-    no warnings;
-    $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY = $ISBNdb_Access_Key;
-
     $filler = new WWW::Wikipedia::TemplateFiller();
-    $source = $filler->get( $type => $id );
+    $source = $filler->get( $type => $id, %config );
     if( $source ) {
-      $template_markup = $source->fill(%params)->output(%params);
+      # encode_entities=>1 so that HTML entities are escaped in the
+      # wiki markup, so that the html::template template doesn't have
+      # to do an escape=html. This is so things like raw endashes are
+      # converted into &ndash; and output as &ndash;, and not a raw
+      # endash. Recall that escape=html only does <, >, and &. But we
+      # also need things like raw endashes encoded as well to prevent
+      # some weird browser behavior.
+      $template_markup = $source->fill(%params)->output( %params, encode_entities => 1);
     } else {
       $error_message = "Could not find requested source.";
     }
@@ -60,9 +92,10 @@ sub make_form {
 
   my $format = $q->param('format') || '';
 
-  if( $format eq 'xml' ) {
+  if( $format eq 'xml' and $id and $type ) {
     my $xml = '';
-    my $writer = new XML::Writer( OUTPUT => \$output );
+    my $writer = new XML::Writer( OUTPUT => \$xml, DATA_MODE => 1, DATA_INDENT => '  ' );
+    $writer->xmlDecl('utf-8');
     $writer->startTag( 'wikitool', application => 'cite' );
 
     $writer->startTag( 'query' );
@@ -77,12 +110,12 @@ sub make_form {
       $writer->characters( $source_url );
       $writer->endTag();
 
-      $writer->startTag( 'content', template => 'Template:'.$template_name );
+      $writer->startTag( 'content', template => 'Template:'.ucfirst($source->template_name) );
       $writer->characters( $template_markup );
       $writer->endTag();
 
       $writer->startTag('paramlist');
-      while( my( $k, $v ) = each %query_params ) {
+      while( my( $k, $v ) = each %params ) {
         $writer->startTag( 'param', name => $k );
         $writer->characters($v);
         $writer->endTag();
@@ -109,11 +142,11 @@ sub make_form {
 
   my $temp = $self->load_template( 'start.html' );
   $temp->param(
-    error_message => $error_message,
-    template_markup => $template_markup,
-    data_sources => $data_sources,
+    error_message    => $error_message,
+    template_markup  => $template_markup,
+    data_sources     => $data_sources,
     checkbox_options => $self->checkbox_options,
-    source_url => $source_url,
+    source_url       => $source_url,
     $self->query_params,
   );
 
@@ -125,7 +158,7 @@ sub make_form {
 
 =head2 load_template
 
-Loads the specified template.
+Loads the specified L<HTML::Template> template.
 
 =cut
 
@@ -136,7 +169,8 @@ sub load_template {
 
 =head2 keyed_data_sources
 
-Returns data sources by key.
+Returns data sources by key. Used in populating the "Data sources"
+section of the cgi/templates/start.html template.
 
 =cut
 
@@ -158,12 +192,13 @@ Returns all data sources in an array reference.
 
 sub data_sources {
   return [
-    { name => 'DrugBank ID', source => 'drugbank_id', template => 'drugbox',      example_id => 'DB00328' },
-    { name => 'HGNC ID',     source => 'hgnc_id',     template => 'protein',      example_id => '12403' },
-    { name => 'ISBN',        source => 'isbn',        template => 'cite_book',    example_id => '0721659446' },
-    { name => 'PubMed ID',   source => 'pubmed_id',   template => 'cite_journal', example_id => '123455' },
-    { name => 'PubChem ID',  source => 'pubchem_id',  template => 'chembox_new',  example_id => '2244' },
-    { name => 'URL',         source => 'url',         template => 'cite_web',     example_id => 'http://en.wikipedia.org' },
+    { name => 'DrugBank ID',       source => 'drugbank_id',        template => 'drugbox',      example_id => 'DB00328' },
+    { name => 'HGNC ID',           source => 'hgnc_id',            template => 'protein',      example_id => '12403' },
+    { name => 'ISBN',              source => 'isbn',               template => 'cite_book',    example_id => '0721659446' },
+    { name => 'PubMed ID',         source => 'pubmed_id',          template => 'cite_journal', example_id => '123455' },
+    { name => 'PubMed Central ID', source => 'pubmedcentral_id',   template => 'cite_journal', example_id => '137841' },
+    { name => 'PubChem ID',        source => 'pubchem_id',         template => 'chembox_new',  example_id => '2244' },
+    { name => 'URL',               source => 'url',                template => 'cite_web',     example_id => 'http://en.wikipedia.org' },
   ];
 }
 
@@ -185,7 +220,7 @@ sub query_params {
 
 =head2 params
 
-Returns all params.
+Returns all known parameters and their labels.
 
 =cut
 
@@ -230,5 +265,54 @@ sub checkbox_options {
 
   return \@options;
 }
+
+=head1 AUTHOR
+
+David J. Iberri, C<< <diberri at cpan.org> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to
+C<bug-www-wikipedia-templatefiller at rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WWW-Wikipedia-TemplateFiller>.
+I will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc WWW::Wikipedia::TemplateFiller
+
+You can also look for information at:
+
+=over 4
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/WWW-Wikipedia-TemplateFiller>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/WWW-Wikipedia-TemplateFiller>
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-Wikipedia-TemplateFiller>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/WWW-Wikipedia-TemplateFiller>
+
+=back
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright (c) David J. Iberri, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
 
 1;
