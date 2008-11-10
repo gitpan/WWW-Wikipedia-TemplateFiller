@@ -16,10 +16,10 @@ $source = $filler->get( URL => 'http://diberri.dyndns.org/perl/test/no-title.htm
 is( $source->{title}, 'diberri.dyndns.org', 'title based on domain' );
 
 $source = $filler->get( pubmedcentral_id => '137841' );
-is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Dworkin J, Losick R |title=Does RNA polymerase help drive chromosome segregation in bacteria? |journal=Proc. Natl. Acad. Sci. U.S.A. |volume=99 |issue=22 |pages=14089${ndash}94 |year=2002 |month=October |pmid=12384568 |doi=10.1073/pnas.182539899 |url=}}", 'pubmedcentral_id' );
+is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Dworkin J, Losick R |title=Does RNA polymerase help drive chromosome segregation in bacteria? |journal=Proc. Natl. Acad. Sci. U.S.A. |volume=99 |issue=22 |pages=14089${ndash}94 |year=2002 |month=October |pmid=12384568 |pmc=137841 |doi=10.1073/pnas.182539899 |url=}}", 'pubmedcentral_id' );
 
 $source = $filler->get( pubmed_id => '12384568' );
-is( $source->fill->output( add_accessdate => 0, add_text_url => 0 ), "{{cite journal |author=Dworkin J, Losick R |title=Does RNA polymerase help drive chromosome segregation in bacteria? |journal=Proc. Natl. Acad. Sci. U.S.A. |volume=99 |issue=22 |pages=14089${ndash}94 |year=2002 |month=October |pmid=12384568 |doi=10.1073/pnas.182539899 |url=}}", 'pmc_id' );
+is( $source->fill->output( add_accessdate => 0, add_text_url => 0 ), "{{cite journal |author=Dworkin J, Losick R |title=Does RNA polymerase help drive chromosome segregation in bacteria? |journal=Proc. Natl. Acad. Sci. U.S.A. |volume=99 |issue=22 |pages=14089${ndash}94 |year=2002 |month=October |pmid=12384568 |pmc=137841 |doi=10.1073/pnas.182539899 |url=}}", 'pmc_id' );
 
 $source = $filler->get( pubmed_id => '12345' );
 is( $source->fill->output( add_accessdate => 0 ), '{{cite journal |author=Rubinstein MH |title=A new granulation method for compressed tablets [proceedings] |journal=J. Pharm. Pharmacol. |volume=28 Suppl |issue= |pages=67P |year=1976 |month=December |pmid=12345 |doi= |url=}}', 'expand month' );
