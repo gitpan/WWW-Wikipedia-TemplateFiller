@@ -1,5 +1,5 @@
 #!perl -T
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 BEGIN {
   use_ok( 'WWW::Wikipedia::TemplateFiller' );
@@ -13,12 +13,17 @@ my $access_key = $ENV{ISBNDB_ACCESS_KEY};
 my $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $access_key );
 
 my $source;
+
+$source = $filler->get( pubmed_id => '18535242' );
+is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, ''et al'' |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science (journal) |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
+
+is( $source->fill->output( add_accessdate => 0, dont_use_etal => 1 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, Shao L, Winoto L, Kner P, Burke B, Cardoso MC, Agard DA, Gustafsson MG, Leonhardt H, Sedat JW |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science (journal) |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
+
 $source = $filler->get( URL => 'http://diberri.dyndns.org/perl/test/no-title.html' );
 is( $source->{title}, 'diberri.dyndns.org', 'title based on domain' );
 
-$source = $filler->get( pubmedcentral_id => '137841' );
-
 # (bug #40960) workaround in case NCBI error 803 rears its head during 'make test'
+$source = $filler->get( pubmedcentral_id => '137841' );
 if( $source->{pmc_id} ) {
   is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Dworkin J, Losick R |title=Does RNA polymerase help drive chromosome segregation in bacteria? |journal=Proc. Natl. Acad. Sci. U.S.A. |volume=99 |issue=22 |pages=14089${ndash}94 |year=2002 |month=October |pmid=12384568 |pmc=137841 |doi=10.1073/pnas.182539899 |url=}}", 'get from pubmedcentral_id' );
 } else {

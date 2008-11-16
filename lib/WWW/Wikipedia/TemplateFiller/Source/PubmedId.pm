@@ -33,10 +33,7 @@ sub get {
   my $lang = $article->{language_name} eq 'English' ? undef : $article->{language_name};
 
   my @authors = ref $article->{authors} ? @{ $article->{authors} } : ();
-  my $author_list = join ', ', @authors;
-  if( @authors > 6 and !$self->{dont_use_etal} ) {
-    $author_list = join( ', ', @authors[0..2]) . ", ''et al''";
-  }
+  my $author_list = $self->_author_list( \@authors );
 
   for my $field ( qw/ title journal_abbreviation / ) {
     $article->{$field} =~ s/\=/encode_entities('&#61;')/ge;
@@ -46,8 +43,19 @@ sub get {
     __source_url => $article->url,
     %$article,
     author => $author_list,
+    _authors => \@authors,
     language => $lang,
   } );
+}
+
+sub _author_list {
+  my( $self, $authors, %args ) = @_;
+  my $all_authors = join ', ', @$authors;
+  return $args{dont_use_etal}
+    ? $all_authors
+    : @$authors > 6
+        ? join( ', ', @$authors[0..2] ) . ", ''et al''"
+        : $all_authors;
 }
 
 sub template_name { 'cite journal' }
@@ -101,6 +109,7 @@ sub template_output_fields {
   $fields{accessdate} = $self->__today_and_now if $add_accessdate;
   $fields{url} = $self->{text_url} if $args{add_text_url};
   $fields{journal} = '[['.$self->{basic_fields}->{journal}.']]' if $args{link_journal};
+  $fields{author} = $self->_author_list( $self->{_authors}, dont_use_etal => $args{dont_use_etal} );
 
   return \%fields;
 }

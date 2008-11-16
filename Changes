@@ -1,5 +1,10 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.05
+date:    2008-11-16
+changes:
+  - proper handling of dont_use_etal attribute
+
 version: 0.04
 date:    2008-11-15
 changes:
