@@ -2,7 +2,7 @@ package WWW::Wikipedia::TemplateFiller;
 use warnings;
 use strict;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use WWW::Search;
 use Cache::SizeAwareFileCache;
@@ -52,9 +52,11 @@ principles persist.
 
 =head2 new
 
-  my $filler = new WWW::Wikipedia::TemplateFiller();
+  my $filler = new WWW::Wikipedia::TemplateFiller( %attrs );
 
-Creates a new template filler.
+Creates a new template filler. Attributes are allowed in C<%attrs>.
+These include C<isbndb_access_key>, which is the API key to be used
+for making ISBN queries via isbndb.com.
 
 =cut
 
@@ -66,6 +68,10 @@ sub new {
     default_expires_in => '10 minutes',
     max_size => '1000000'
   } );
+
+  warn "ISBN lookups unavailable since isbndb_access_key was not provided to WWW::Wikipedia::TemplateFiller->new()"
+    unless $attr{isbndb_access_key};
+
   return bless \%attr, $pkg;
 }
 
@@ -145,6 +151,37 @@ sub __type_to_std_class {
   return __PACKAGE__ . '::' . $class_type . '::' . $camelcase_class;
 }
 
+=head1 ISBNdb ACCESS
+
+Currently W::W::TF uses ISBNdb (L<http://www.isbndb.com>) for
+accessing information about books. This will likely change somewhat in
+the future to allow for multiple book databases to be queried. For
+now, however, ISBNdb is the only option. If you plan to use this
+module for querying book data, then you must supply an ISBNdb access
+key.
+
+There are two ways to provide an access key. The first is accomplished
+by passing a parameter to W::W::TF's new() method:
+
+  use WWW::Wikipedia::TemplateFiller;
+  my $tf = new WWW::Wikipedia::TemplateFiller(
+    isbndb_access_key => 'your_access_key'
+  );
+
+The second method is used by the W::W::TF::WebApp web application.
+For this, simply edit the C<%config> hash within the included web
+application instance script in cgi/index.cgi. The C<INSTALL> file
+provides more details.
+
+The third and final method is to assign the access key to an
+environment variable called C<ISBNDB_ACCESS_KEY>. This is accomplished
+something like this:
+
+  $ export ISBNDB_ACCESS_KEY=your_access_key
+
+(This environment variable-based solution is the only way to test
+ISBNdb support during installation.)
+
 =head1 AUTHOR
 
 David J. Iberri, C<< <diberri at cpan.org> >>
@@ -152,10 +189,11 @@ David J. Iberri, C<< <diberri at cpan.org> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to
-C<bug-www-wikipedia-templatefiller at rt.cpan.org>, or through the web interface at
+C<bug-www-wikipedia-templatefiller at rt.cpan.org>, or through the web
+interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WWW-Wikipedia-TemplateFiller>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
+I will be notified, and then you'll automatically be notified of
+progress on your bug as I make changes.
 
 =head1 SUPPORT
 

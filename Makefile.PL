@@ -5,6 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME                => 'WWW::Wikipedia::TemplateFiller',
     AUTHOR              => 'David J. Iberri <diberri@cpan.org>',
+    LICENSE             => 'perl',
     VERSION_FROM        => 'lib/WWW/Wikipedia/TemplateFiller.pm',
     ABSTRACT_FROM       => 'lib/WWW/Wikipedia/TemplateFiller.pm',
     PL_FILES            => {},
@@ -21,7 +22,7 @@ WriteMakefile(
         'WWW::Search::DrugBank' => 0,
         'WWW::Search::HGNC' => 0,
         'WWW::Search::PubChem' => 0,
-        'WWW::Search::PubMedLite' => 0,
+        'WWW::Search::PubMedLite' => 0.05, # pmc_id support/error handling
         'XML::Writer' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

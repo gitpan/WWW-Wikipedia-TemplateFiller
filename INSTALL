@@ -1,57 +1,33 @@
-WWW::Wikipedia::TemplateFiller installation guide
-=================================================
+WWW::Wikipedia::TemplateFiller installation
+===========================================
 
 The easiest way to install WWW::Wikipedia::TemplateFiller is via the
 CPAN, which automatically checks for and installs dependencies as
-needed. To do so, simply execute
+needed.
 
-  % cpan WWW::Wikipedia::TemplateFiller
+If you wish to test the ISBNdb functionality, you will need to provide
+your ISBNdb developer's access key before 'make test' is invoked by the CPAN.
+This can be done in the shell with something like
 
-from the command-line, or issue 'install
-WWW::Wikipedia::TemplateFiller' from the cpan shell and specify that
-you would like dependencies to be installed.
+  $ export ISBNDB_ACCESS_KEY=your_key_here
 
-You will likely receive a number of warnings during the testing phase
-of installation. It is safe to ignore these:
+And then enter CPAN and install the module:
+
+  $ cpan WWW::Wikipedia::TemplateFiller
+
+Warnings during installation
+============================
+
+You may receive warnings during installation. The following are safe
+to ignore:
 
   t/01-fill.........ok 7/16Parsing of undecoded UTF-8 will give garbage when decoding entities at /usr/local/lib/perl5/site_perl/5.8.6/WWW/Mechanize.pm line 449, <DATA> line 484.
   t/01-fill.........ok 8/16Parsing of undecoded UTF-8 will give garbage when decoding entities at /usr/local/lib/perl5/site_perl/5.8.6/WWW/Mechanize.pm line 449, <DATA> line 484.
   t/01-fill.........ok 11/16Use of uninitialized value in length at /usr/local/lib/perl5/5.8.6/Text/ParseWords.pm line 29.
   t/01-fill.........ok 12/16Use of uninitialized value in length at /usr/local/lib/perl5/5.8.6/Text/ParseWords.pm line 29.
 
-If anyone has a way to resolve these warnings, though, feel free to
-drop me an email.
-
-ISBNdb access
-=============
-
-Currently W::W::TF uses ISBdb for accessing information about
-books. This will likely change in the future to allow for multiple
-book databases to be queried. For now, to allow W::W::TF to use
-ISBNdb, you must provide it an isbndb.com developer's access key.
-
-Access keys can be provided to W::W::TF in three ways: for direct
-access, for web access, and for testing. If you will be using W::W::TF
-directly, pass the isbndb.com access key in your call to get():
-
-  my $isbn = '12345xxx';
-  my $key = 'MyAccessKey';
-
-  use WWW::Wikipedia::TemplateFiller;
-  my $filler = new WWW::Wikipedia::TemplateFiller();
-  $filler->get( isbn => $isbn, isbndb_access_key => $key );
-
-If you will be using W::W::TF::WebApp to provide web access to
-W::W::TF, then the access key should be specified in the %config hash
-of W::W::TF::WebApp.
-
-For testing the ability of W::W::TF to query isbndb.com during 'make
-test', provide the access key in an environment variable called
-ISBNDB_ACCESS_KEY, as in:
-
-  export ISBNDB_ACCESS_KEY=MyAccessKey
-
-Then issue 'make test'.
+If anyone has a way to resolve these warnings, feel free to drop me an
+email.
 
 Web access
 ==========
@@ -59,28 +35,33 @@ Web access
 W::W::TF comes with a built-in web application for deploying the
 template filler via the web. The application is coded in
 W::W::TF::WebApp and uses the CGI::Application framework. An instance
-script that uses W::W::TF::WebApp is available; it is called
+script that uses W::W::TF::WebApp is available as well; it is called
 cgi/index.cgi. Templates used by W::W::TF::WebApp are stored in
-cgi/templates. To install these files, copy the cgi directory to your
-cgi-bin directory and provide proper file permissions to files
-contained therein. For example:
+cgi/templates.
 
-  % cp -r cgi /var/www/cgi-bin/templatefiller
+To install these files, copy the cgi directory to your cgi-bin
+directory and provide proper file permissions to files contained
+therein. For example:
+
+  % cp -r cgi /var/www/cgi-bin/wtf
 
 For permissions, something like this ought to work:
 
-  % chmod 655 /var/www/cgi-bin/templatefiller/index.cgi
-  % chmod a+r /var/www/cgi-bin/templatefiller/templates/*
+  % chmod 655 /var/www/cgi-bin/wtf/index.cgi
+  % chmod a+r /var/www/cgi-bin/wtf/templates/*
 
-Update the $template_path variable in index.cgi to point to the
-templatefiller/templates/ directory. Using the above paths, index.cgi
-should be updated with something like this:
+Update the %config hash in /var/www/cgi-bin/wtf/index.cgi to point to
+the templates directory and assign an ISBNdb access key:
 
-  my $template_path = '/var/www/cgi-bin/templatefiller/templates';
+  # Inside /var/www/cgi-bin/wtf/index.cgi:
+  my %config = (
+    template_path => '/var/www/cgi-bin/wtf/templates',
+    isbndb_access_key => 'your_access_key',
+  );
 
 The template filler should then be available via a standard URL:
 
-  http://yourhost.com/templatefiller/index.cgi
+  http://www.yourhost.com/cgi-bin/wtf/index.cgi
 
 Author
 ======

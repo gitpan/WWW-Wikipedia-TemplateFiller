@@ -5,22 +5,23 @@ use WWW::Wikipedia::TemplateFiller;
 use XML::Writer;
 use Tie::IxHash;
 
-# Access key for ISBNdb.com's API
-my %config = (
-  isbndb_access_key => 'your_isbndb_access_key';
-);
-
 =head1 NAME
 
 WWW::Wikipedia::TemplateFiller::WebApp - Web interface to WWW::Wikipedia::TemplateFiller
 
 =head1 SYNOSPSIS
 
+Inside the index.cgi instance script:
+
   #!/usr/bin/perl
   use WWW::Wikipedia::TemplateFiller::WebApp;
 
-  my $template_path = '/path/to/web/templates';
-  WWW::Wikipedia::TemplateFiller::WebApp->new( TMPL_PATH => $template_path )->run;
+  my %config = (
+    template_path => '/path/to/web/templates',
+    isbndb_access_key => 'access key here',
+  );
+
+  WWW::Wikipedia::TemplateFiller::WebApp->new( PARAMS => \%config )->run
 
 =head1 DESCRIPTION
 
@@ -42,6 +43,7 @@ Sets up the app for L<CGI::Application>.
 
 sub setup {
   my $self = shift;
+  $self->tmpl_path( $self->param('template_path') );
   $self->mode_param('f');
   $self->start_mode('view');
   $self->run_modes(
@@ -74,7 +76,7 @@ sub view_page {
   my( $filler, $source, $template_markup );
   my $source_url = '';
   if( $type and $id ) {
-    $filler = new WWW::Wikipedia::TemplateFiller();
+    $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $self->param('isbndb_access_key') );
     $source = $filler->get( $type => $id, %config );
     if( $source ) {
       # encode_entities=>1 so that HTML entities are escaped in the

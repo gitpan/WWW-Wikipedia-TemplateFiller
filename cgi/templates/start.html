@@ -9,13 +9,14 @@
 <TMPL_INCLUDE NAME="stylesheet.css">
 </style>
 
+<!-- FIXME: you may need to specify the whole path to script.js -->
 <script type="text/javascript">
 <TMPL_INCLUDE NAME="script.js">
 </script>
 </head>
 <body>
 
-<TMPL_INCLUDE NAME="donation.html">
+<!-- TMPL_INCLUDE NAME="donation.html" -->
 
 <div id="wrapper">
 <form action="index.cgi">
@@ -45,7 +46,7 @@ pasted into a Wikipedia article:</p>
 </p>
 
 <div id="options" class="<tmpl_if name="template_markup">result</tmpl_if><tmpl_if name="error_message">result</tmpl_if>">
-<p style="font-weight:bold">Options:</p>
+<h2 style="font-weight:bold; font-size:12pt">Options:</h2>
 <table style="margin-bottom:10px">
 <TMPL_LOOP NAME="checkbox_options">
   <tr><td>

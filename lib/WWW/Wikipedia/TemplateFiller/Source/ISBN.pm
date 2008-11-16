@@ -12,11 +12,11 @@ use Carp;
 sub new {
   my( $pkg, %attrs ) = @_;
   $attrs{__scraper} = new WWW::Scraper::ISBN();
-  $attrs{__mech} = new WWW::Mechanize();
   $attrs{__scraper}->drivers('ISBNdb');
+  $attrs{__mech} = new WWW::Mechanize();
 
-  # Remember to set $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY in WebApp!
-  $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY = $attrs{isbndb_access_key} or die "no access key provided";
+  # isbndb_access_key must be set via WWW::Wikipedia::TemplateFiller->new( isbndb_access_key => '...' )
+  $WWW::Scraper::ISBN::ISBNdb_Driver::ACCESS_KEY = $attrs{filler}->{isbndb_access_key} or die "no isbndb_access_key provided";
 
   return bless \%attrs, $pkg;
 }

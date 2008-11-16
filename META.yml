@@ -1,24 +1,33 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         WWW-Wikipedia-TemplateFiller
-version:      0.03
-version_from: lib/WWW/Wikipedia/TemplateFiller.pm
-installdirs:  site
+--- #YAML:1.0
+name:               WWW-Wikipedia-TemplateFiller
+version:            0.04
+abstract:           Fill Wikipedia templates with your eyes closed
+author:
+    - David J. Iberri <diberri@cpan.org>
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
 requires:
-    Cache::SizeAwareFileCache:     0
-    CGI::Application:              0
-    Date::Calc:                    0
-    Test::More:                    0
-    Tie::IxHash:                   0
-    WWW::Mechanize:                0
-    WWW::Scraper::ISBN:            0
-    WWW::Scraper::ISBN::ISBNdb_Driver: 0
-    WWW::Search:                   0
-    WWW::Search::DrugBank:         0
-    WWW::Search::HGNC:             0
-    WWW::Search::PubChem:          0
-    WWW::Search::PubMedLite:       0
-    XML::Writer:                   0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+    Cache::SizeAwareFileCache:  0
+    CGI::Application:     0
+    Date::Calc:           0
+    Test::More:           0
+    Tie::IxHash:          0
+    WWW::Mechanize:       0
+    WWW::Scraper::ISBN:   0
+    WWW::Scraper::ISBN::ISBNdb_Driver:  0
+    WWW::Search:          0
+    WWW::Search::DrugBank:  0
+    WWW::Search::HGNC:    0
+    WWW::Search::PubChem:  0
+    WWW::Search::PubMedLite:  0.05
+    XML::Writer:          0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.48
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
