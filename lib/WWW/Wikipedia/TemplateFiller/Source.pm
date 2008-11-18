@@ -21,7 +21,7 @@ WWW::Wikipedia::TemplateFiller::Source - Base class for data sources
 This is an internal base class from which data source classes
 inherit. From an end-user perspective, there is unlikely any reason to
 know anything about this module. That said, feel free to poke
-around. :-)
+around.
 
 =head1 METHODS
 
@@ -207,7 +207,10 @@ sub output {
     next if $info->{show} eq 'show_if_filled' and !defined($info->{value});
     next if $info->{show} eq 'show_if_extended' and !$show_extended;
 
-    my $pair = sprintf ( ($add_param_space ? "%s = %s" : "%s=%s"), $param, $info->{value} || '');
+    my $param_value = $info->{value} || '';
+       $param_value =~ s/\|/&#124;/g;
+
+    my $pair = sprintf ( ($add_param_space ? "%s = %s" : "%s=%s"), $param, $param_value );
     push @pairs, $pair;
   }
 

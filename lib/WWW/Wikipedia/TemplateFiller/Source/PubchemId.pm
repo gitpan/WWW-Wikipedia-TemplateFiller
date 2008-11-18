@@ -6,6 +6,9 @@ use strict;
 
 use Tie::IxHash;
 
+# Terrible hack to enable more elegant solution to bug #41005
+my $EscapedPipe = '98lkdfb832nbueh92x0jngfk';
+
 sub search_class { 'PubChem' }
 
 sub get {
@@ -22,7 +25,11 @@ sub get {
 sub output {
   my( $self, %args ) = @_;
   $args{vertical} = 1;
-  return $self->SUPER::output(%args);
+
+  my $output = $self->SUPER::output(%args);
+     $output =~ s/$EscapedPipe/\|/g;
+
+  return $output;
 }
 
 sub template_name { 'chembox new' }
@@ -38,12 +45,12 @@ sub template_basic_fields {
     -ImageSize => '',
     -IUPACName => $self->{iupac_name},
     -OtherNames => '',
-    -Section1 => sprintf( "{{Chembox Identifiers\n|  %s=%s\n|  %s=%s\n|  %s=%s\n  }}",
+    -Section1 => sprintf( "{{Chembox Identifiers\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
       CASNo => '',
       PubChem => $self->{pubchem_id},
       SMILES => $self->{smiles},
     ),
-    -Section2 => sprintf( "{{Chembox Properties\n|  %s=%s\n|  %s=%s\n|  %s=%s\n|  %s=%s\n|  %s=%s\n|  %s=%s\n|  %s=%s\n  }}",
+    -Section2 => sprintf( "{{Chembox Properties\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
       Formula => $formula_html,
       MolarMass => $self->{molecular_weight},
       Appearance => '',
@@ -52,7 +59,7 @@ sub template_basic_fields {
       BoilingPt => '',
       Solubility => '',
     ),
-    -Section3 => sprintf( "{{Chembox Hazards\n|  %s=%s\n|  %s=%s\n|  %s=%s\n  }}",
+    -Section3 => sprintf( "{{Chembox Hazards\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
       MainHazards => '',
       FlashPt => '',
       Autoignition => '',

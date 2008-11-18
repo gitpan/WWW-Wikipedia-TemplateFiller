@@ -1,5 +1,11 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.06
+date:    2008-11-17
+changes:
+  - (bug #41005) vertical pipes in HTML page titles are escaped to
+    &#124; to avoid conflict with Wikipedia template syntax
+
 version: 0.05
 date:    2008-11-16
 changes:

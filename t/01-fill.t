@@ -1,5 +1,5 @@
 #!perl -T
-use Test::More tests => 20;
+use Test::More tests => 21;
 
 BEGIN {
   use_ok( 'WWW::Wikipedia::TemplateFiller' );
@@ -13,6 +13,9 @@ my $access_key = $ENV{ISBNDB_ACCESS_KEY};
 my $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $access_key );
 
 my $source;
+
+$source = $filler->get( URL => 'http://news.bbc.co.uk/2/hi/business/7732733.stm' );
+is( $source->fill->output( add_accessdate => 0 ), "{{cite web |url=http://news.bbc.co.uk/2/hi/business/7732733.stm |title=BBC NEWS &#124; Business &#124; Japanese economy now in recession |format= |work= |accessdate=}}", '(bug #41005) vertical pipes in HTML page titles' );
 
 $source = $filler->get( pubmed_id => '18535242' );
 is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, ''et al'' |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science (journal) |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
