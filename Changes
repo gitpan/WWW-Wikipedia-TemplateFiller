@@ -1,5 +1,17 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.07
+date:    2008-11-18
+changes:
+  - (bug #41053) get() now dies if $id is undefined
+  - in fixing this bug, change W::W::TF::S::PubmedcentralId.pm to no
+    longer inherit from PubmedId; now calls to get() are routed
+    through $self->filler->get() to ensure that W::W::TF's get()
+    (which appropriately handles empty IDs) is called
+  - WebApp.pm now traps errors thrown during template filling and
+    issues error message appropriately, preventing the die() from
+    being propagated to Apache
+
 version: 0.06
 date:    2008-11-17
 changes:

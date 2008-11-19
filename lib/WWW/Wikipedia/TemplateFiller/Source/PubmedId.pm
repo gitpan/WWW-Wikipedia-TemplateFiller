@@ -25,6 +25,8 @@ sub get {
   $self->{__search}->native_query($pmid);
   my $article = $self->{__search}->next_result;
 
+  die "no article matches the given PubMed ID ($pmid)" unless $article;
+
   # Strip trailing period from title if requested
   unless( $self->{dont_strip_trailing_period} ) {
     $article->{title} =~ s/\.$//;

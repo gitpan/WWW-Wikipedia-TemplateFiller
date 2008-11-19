@@ -1,5 +1,5 @@
 #!perl -T
-use Test::More tests => 21;
+use Test::More tests => 22;
 
 BEGIN {
   use_ok( 'WWW::Wikipedia::TemplateFiller' );
@@ -13,6 +13,11 @@ my $access_key = $ENV{ISBNDB_ACCESS_KEY};
 my $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $access_key );
 
 my $source;
+
+eval {
+  $source = $filler->get( pubmedcentral_id => '1247673' );
+};
+ok( $@ =~ /no pubmed_id given/, '(bug #41053) get() dies if id not provided' );
 
 $source = $filler->get( URL => 'http://news.bbc.co.uk/2/hi/business/7732733.stm' );
 is( $source->fill->output( add_accessdate => 0 ), "{{cite web |url=http://news.bbc.co.uk/2/hi/business/7732733.stm |title=BBC NEWS &#124; Business &#124; Japanese economy now in recession |format= |work= |accessdate=}}", '(bug #41005) vertical pipes in HTML page titles' );

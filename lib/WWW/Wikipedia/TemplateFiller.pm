@@ -2,7 +2,7 @@ package WWW::Wikipedia::TemplateFiller;
 use warnings;
 use strict;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use WWW::Search;
 use Cache::SizeAwareFileCache;
@@ -98,6 +98,8 @@ L<WWW::Wikipedia::TemplateFiller::Source> for information.
 
 sub get {
   my( $self, $source_type, $id, %attrs ) = @_;
+  die "no source type (eg, pubmed_id, isbn) given" unless $source_type;
+  die "no $source_type given" unless $id;
   my $source_class = $self->__load_class( source => $source_type );
   my $source = $source_class->new( %attrs, filler => $self )->get($id);
   return $self->{__source} = $source;
@@ -117,9 +119,6 @@ sub __load_class {
   my( $pkg, $class_type, $which ) = @_;
 
   my @classes = $pkg->__to_classes( $class_type => $which );
-
-#  use Data::Dump 'dump';
-#  die dump \@classes if $which =~ /url/i;
 
   foreach my $class ( @classes ) {
     return $class if eval "use $class; 1" or $class->isa($pkg);

@@ -12,7 +12,11 @@ sub get {
   my $parser = new XML::LibXML();
   my $doc = $parser->parse_string($xml);
   my $pmid = $doc->findvalue('/eLinkResult/LinkSet/LinkSetDb[LinkName="pmc_pubmed"]/Link/Id');
-  return $self->SUPER::get($pmid);
+
+  # Route through $self->filler->get rather than $self->SUPER::get()
+  # so that we consistently use filler's get() as an entry point. This
+  # was introduced during the fix for ticket #41053.
+  return $self->filler->get( pubmed_id => $pmid );
 }
 
 1;

@@ -77,7 +77,12 @@ sub view_page {
   my $source_url = '';
   if( $type and $id ) {
     $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $self->param('isbndb_access_key') );
-    $source = $filler->get( $type => $id, %config );
+
+    eval {
+      $source = $filler->get( $type => $id, %config );
+    };
+    $error_message = $@;
+
     if( $source ) {
       # encode_entities=>1 so that HTML entities are escaped in the
       # wiki markup, so that the html::template template doesn't have
@@ -88,7 +93,7 @@ sub view_page {
       # some weird browser behavior.
       $template_markup = $source->fill(%params)->output( %params, encode_entities => 1);
     } else {
-      $error_message = "Could not find requested source.";
+      $error_message ||= "Could not find requested source.";
     }
   }
 
