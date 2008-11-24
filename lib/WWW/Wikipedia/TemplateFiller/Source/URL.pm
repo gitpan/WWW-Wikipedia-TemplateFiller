@@ -36,21 +36,21 @@ sub template_basic_fields {
 
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
-    -url => $url_enc,
-    -title => $self->{title},
-    '+author' => '',
-    '+authorlink' => '',
-    '+coauthors' => '',
-    '+date' => '',
-    -format => '',
-    -work => '',
-    '+publisher' => '',
-    '+pages' => '',
-    '+language' => '',
-    '+archiveurl' => '',
-    '+archivedate' => '',
-    '+quote' => '',
-    -accessdate => '',
+    url => { value => $url_enc },
+    title => { value => $self->{title} },
+    author => { value => '', show => 'if-extended' },
+    authorlink => { value => '', show => 'if-extended' },
+    coauthors => { value => '', show => 'if-extended' },
+    date => { value => '', show => 'if-extended' },
+    format => { value => '' },
+    work => { value => '' },
+    publisher => { value => '', show => 'if-extended' },
+    pages => { value => '', show => 'if-extended' },
+    language => { value => '', show => 'if-extended' },
+    archiveurl => { value => '', show => 'if-extended' },
+    archivedate => { value => '', show => 'if-extended' },
+    quote => { value => '', show => 'if-extended' },
+    accessdate => { value => '' },
   );
 
   return \%fields;
@@ -60,7 +60,7 @@ sub template_output_fields {
   my( $self, %args ) = @_;
 
   tie( my %fields, 'Tie::IxHash' );
-  $fields{accessdate} = $self->__today_and_now if $args{add_accessdate};
+  $fields{accessdate} = { value => $self->__today_and_now } if $args{add_accessdate};
 
   return \%fields;
 }

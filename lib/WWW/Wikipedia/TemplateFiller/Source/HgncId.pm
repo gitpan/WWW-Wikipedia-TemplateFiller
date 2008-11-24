@@ -40,27 +40,27 @@ sub template_basic_fields {
 
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
-    -name    => $self->{approved_name},
-    -caption => '',
-    -image   => '',
-    -width   => '',
+    name    => { value => $self->{approved_name} },
+    caption => { value => '' },
+    image   => { value => '' },
+    width   => { value => '' },
 
-    -HGNCid => $self->{hgnc_id},
-    -Symbol => $self->{approved_symbol},
-    -AltSymbols => $self->{previous_symbols},
+    HGNCid => { value => $self->{hgnc_id} },
+    Symbol => { value => $self->{approved_symbol} },
+    AltSymbols => { value => $self->{previous_symbols} },
 
-    -EntrezGene => $self->{entrez_gene_ids}->[0] || $self->{mapped_entrez_gene_id},
+    EntrezGene => { value => $self->{entrez_gene_ids}->[0] || $self->{mapped_entrez_gene_id} },
   
-    -OMIM => $self->{omim_id},
-    -RefSeq => $self->{refseq_ids}->[0] || $self->{mapped_refseq_id},
-    -UniProt => $self->{uniprot_id} || $self->{mapped_uniprot_id},
-    -PDB => '',
-    -ECnumber => $self->{enzyme_ids}->[0],
+    OMIM => { value => $self->{omim_id} },
+    RefSeq => { value => $self->{refseq_ids}->[0] || $self->{mapped_refseq_id} },
+    UniProt => { value => $self->{uniprot_id} || $self->{mapped_uniprot_id} },
+    PDB => { value => '' },
+    ECnumber => { value => $self->{enzyme_ids}->[0] },
   
-    -Chromosome => $chromosome,
-    -Arm => $arm,
-    -Band => $band,
-    -LocusSupplementaryData => '',
+    Chromosome => { value => $chromosome },
+    Arm => { value => $arm },
+    Band => { value => $band },
+    LocusSupplementaryData => { value => '' },
   );
 
   return \%fields;

@@ -1,5 +1,14 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.08
+date:    2008-11-23
+changes:
+  - (bug #41162) fix 'make test' in perl 5.10.x
+  - in fixing above, switched template parameter descriptions from
+    older 'field', '-field', and '+field' notation to using more
+    descriptive names in a hash (eg, "field => { value => 'foo', show
+    => 'if-extended' }", etc.)
+
 version: 0.07
 date:    2008-11-18
 changes:

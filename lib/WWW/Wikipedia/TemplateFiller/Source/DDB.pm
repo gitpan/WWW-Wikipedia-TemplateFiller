@@ -1,6 +1,8 @@
 package WWW::Wikipedia::TemplateFiller::Template::Infoboxdisease;
 use base 'WWW::Wikipedia::TemplateFiller::Template';
 
+# XXX totally broken
+
 use warnings;
 use strict;
 

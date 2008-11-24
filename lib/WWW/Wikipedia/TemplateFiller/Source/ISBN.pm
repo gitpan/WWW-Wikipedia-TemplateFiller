@@ -47,19 +47,19 @@ sub get {
 
   return $self->__source_obj( {
     __source_url => $book->{_source_url},
-    -author => $book->{author},
-    -title => $book->{title},
-    -publisher => $book->{publisher},
-    -location => $book->{location},
-    -year => $book->{year},
-    -pages => '',
+    author => $book->{author},
+    title => $book->{title},
+    publisher => $book->{publisher},
+    location => $book->{location},
+    year => $book->{year},
+    pages => '',
 
     # New fields (removed 'id')
-    -isbn => $isbn,
-    -oclc => '',
-    -doi => '',
+    isbn => $isbn,
+    oclc => '',
+    doi => '',
     
-    -accessdate => '',
+    accessdate => '',
   } );
 }
 
@@ -70,24 +70,24 @@ sub template_basic_fields {
 
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
-    -author    => $self->{author},
-   '+authorlink' => '',
-   '+editor'   => '',
-   '+others'   => '',
-    -title     => $self->{title},
-   '+edition'  => '',
-   '+language' => '',
-    -publisher => $self->{publisher},
-    -location  => $self->{location},
-    -year      => $self->{year},
-   '+origyear' => '',
-    -pages     => '',
-   '+quote'    => '',
-    -isbn      => $self->{isbn},
-    -oclc      => '',
-    -doi       => '',
-   '+url'      => '',
-   -accessdate => '',
+    author     => { value => $self->{author} },
+    authorlink => { value => '', show => 'if-extended' },
+    editor     => { value => '', show => 'if-extended' },
+    others     => { value => '', show => 'if-extended' },
+    title      => { value => $self->{title} },
+ 			edition    => { value => '', show => 'if-extended' },
+ 			language   => { value => '', show => 'if-extended' },
+    publisher  => { value => $self->{publisher} },
+    location   => { value => $self->{location} },
+    year       => { value => $self->{year} },
+ 			origyear   => { value => '', show => 'if-extended' },
+ 			pages      => { value => '' },
+ 			quote      => { value => '', show => 'if-extended' },
+    isbn       => { value => $self->{isbn} },
+    oclc       => { value => '' },
+    doi        => { value => '' },
+    url        => { value => '', show => 'if-extended' },
+    accessdate => { value => '' },
   );
 
   return \%fields;

@@ -77,26 +77,26 @@ sub template_basic_fields {
 
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
-    -author  => $self->{author},
-    -title   => $self->{title},
-    language => $self->{language},
-    -journal => $journal_title,
-    -volume  => $self->{volume},
-    -issue   => $self->{issue},
-    -pages   => $pages,
-    -year    => $self->{year},
-     month   => $month,
-    -pmid    => $self->{pmid},
-    pmc      => $self->{pmc_id},
+    author   => { value => $self->{author} },
+    title    => { value => $self->{title} },
+    language => { value => $self->{language}, show => 'if-filled' },
+    journal  => { value => $journal_title },
+    volume   => { value => $self->{volume} },
+    issue    => { value => $self->{issue} },
+    pages    => { value => $pages },
+    year     => { value => $self->{year} },
+    month    => { value => $month,            show => 'if-filled' },
+    pmid     => { value => $self->{pmid} },
+    pmc      => { value => $self->{pmc_id},   show => 'if-filled' }, 
   );
 
   my $doi = $self->{doi};
   my $url = $self->{text_url};
   $url = '' if $doi;
 
-  $fields{-doi} = $doi;
-  $fields{-url} = $url;
-  $fields{'+issn'} = '';
+  $fields{doi} = { value => $doi };
+  $fields{url} = { value => $url };
+  $fields{issn} = { value => '', show => 'if-extended' };
 
   return \%fields;
 }
@@ -108,10 +108,10 @@ sub template_output_fields {
   my $link_journal = $args{link_journal};
 
   tie( my %fields, 'Tie::IxHash' );
-  $fields{accessdate} = $self->__today_and_now if $add_accessdate;
-  $fields{url} = $self->{text_url} if $args{add_text_url};
-  $fields{journal} = '[['.$self->{basic_fields}->{journal}.']]' if $args{link_journal};
-  $fields{author} = $self->_author_list( $self->{_authors}, dont_use_etal => $args{dont_use_etal} );
+  $fields{accessdate} = { value => $self->__today_and_now } if $add_accessdate;
+  $fields{url}        = { value => $self->{text_url} } if $args{add_text_url};
+  $fields{journal}    = { value => '[['.$self->{_basic_fields}->{journal}->{value}.']]' } if $args{link_journal};
+  $fields{author}     = { value => $self->_author_list( $self->{_authors}, dont_use_etal => $args{dont_use_etal} ) };
 
   return \%fields;
 }

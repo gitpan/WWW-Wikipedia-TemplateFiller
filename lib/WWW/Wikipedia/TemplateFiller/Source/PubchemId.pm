@@ -41,16 +41,16 @@ sub template_basic_fields {
 
   tie( my %fields, 'Tie::IxHash' );
   %fields = (
-    -ImageFile => '',
-    -ImageSize => '',
-    -IUPACName => $self->{iupac_name},
-    -OtherNames => '',
-    -Section1 => sprintf( "{{Chembox Identifiers\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
+    ImageFile => { value => '' },
+    ImageSize => { value => '' },
+    IUPACName => { value => $self->{iupac_name} },
+    OtherNames => { value => '' },
+    Section1 => { value => sprintf( "{{Chembox Identifiers\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
       CASNo => '',
       PubChem => $self->{pubchem_id},
       SMILES => $self->{smiles},
-    ),
-    -Section2 => sprintf( "{{Chembox Properties\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
+    ) },
+    Section2 => { value => sprintf( "{{Chembox Properties\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
       Formula => $formula_html,
       MolarMass => $self->{molecular_weight},
       Appearance => '',
@@ -58,12 +58,12 @@ sub template_basic_fields {
       MeltingPt => '',
       BoilingPt => '',
       Solubility => '',
-    ),
-    -Section3 => sprintf( "{{Chembox Hazards\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
+    ) },
+    Section3 => { value => sprintf( "{{Chembox Hazards\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n$EscapedPipe  %s=%s\n  }}",
       MainHazards => '',
       FlashPt => '',
       Autoignition => '',
-    ),
+    ) },
   );
 
   return \%fields;

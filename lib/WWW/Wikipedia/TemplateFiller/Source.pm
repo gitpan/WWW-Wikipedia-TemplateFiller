@@ -144,32 +144,7 @@ Fills the appopriate template with data from this source.
 
 sub fill {
   my( $self, %args ) = @_;
-  my $raw_basic_fields = $self->template_basic_fields(%args);
-  
-  my %field_status;
-
-  tie( my %basic_fields, 'Tie::IxHash' );
-  foreach my $raw_param ( keys %$raw_basic_fields ) {
-    next if $raw_param =~ /^__/;
-
-    # Plus:  +Field means show field only if extended-fields is enabled
-    # Minus: -Field means always show, regardless of extended-fields status
-    # Other:  Field means show only if filled
-
-    ( my $param = $raw_param ) =~ s/^([\-\+])//;
-    my $lead = $1 || '';
-    my $show = $lead eq '-'
-      ? 'always_show'
-      : $lead eq '+'
-        ? 'show_if_extended'
-        : 'show_if_filled';
-
-    $field_status{$param} = $show;
-    $basic_fields{$param} = $raw_basic_fields->{$raw_param};
-  }
-  $self->{field_status} = \%field_status;
-  $self->{basic_fields} = \%basic_fields;
-  
+  $self->{_basic_fields} = $self->template_basic_fields( %args );
   return $self;
 }
 
@@ -183,7 +158,7 @@ Returns the filled template output. This is where the magic is.
 
 sub output {
   my( $self, %args ) = @_;
-  $self->fill(%args) unless $self->{basic_fields};
+  $self->fill(%args) unless $self->{_basic_fields};
 
   my $ref_name = $self->get_ref_name;
   my $add_ref_tag = $args{add_ref_tag};
@@ -193,19 +168,14 @@ sub output {
   my $show_extended = $args{extended};
 
   tie( my %all_fields, 'Tie::IxHash' );
-  %all_fields = ( %{ $self->{basic_fields} }, %{ $self->template_output_fields(%args) } );
-
-  tie( my %params, 'Tie::IxHash' );
-  foreach my $param ( keys %all_fields ) {
-    next if $param =~ /^__/;
-    $params{$param} = { value => $all_fields{$param}, show => $self->{field_status}->{$param} };
-  }
+  %all_fields = ( %{ $self->{_basic_fields} }, %{ $self->template_output_fields(%args) } );
 
   my @pairs = ( );
-  while( my( $param, $info ) = each %params ) {
-    $info->{show} ||= '';
-    next if $info->{show} eq 'show_if_filled' and !defined($info->{value});
-    next if $info->{show} eq 'show_if_extended' and !$show_extended;
+  while( my( $param, $info ) = each %all_fields ) {
+ 			die $param unless ref $info;
+    $info->{show} ||= 'always';
+    next if $info->{show} eq 'if-filled' and !defined($info->{value});
+    next if $info->{show} eq 'if-extended' and !$show_extended;
 
     my $param_value = $info->{value} || '';
        $param_value =~ s/\|/&#124;/g;
@@ -240,7 +210,7 @@ sub output {
       $writer->endTag();
 
       $writer->startTag('paramlist');
-      while( my( $param, $info ) = each %params ) {
+      while( my( $param, $info ) = each %all_fields ) {
         $writer->startTag( 'param', name => $param );
         $writer->characters($info->{value});
         $writer->endTag();
