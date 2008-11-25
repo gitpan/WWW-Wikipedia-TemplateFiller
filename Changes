@@ -1,5 +1,14 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.09
+date:    2008-11-25
+changes:
+  - (bug #41162) another attempt to fix 'make test' in perl 5.10.x
+  - this entailed removing references to sprintf() in the code, as
+    sprintf() is currently complaining about the use of tainted
+    values.
+    (cf. http://rt.cpan.org/Ticket/Display.html?id=41162#txn-537097)
+
 version: 0.08
 date:    2008-11-23
 changes:
