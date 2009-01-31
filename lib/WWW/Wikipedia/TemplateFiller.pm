@@ -2,7 +2,7 @@ package WWW::Wikipedia::TemplateFiller;
 use warnings;
 use strict;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use WWW::Search;
 use Cache::SizeAwareFileCache;
@@ -69,7 +69,7 @@ sub new {
     max_size => '1000000'
   } );
 
-  warn "ISBN lookups unavailable since isbndb_access_key was not provided to WWW::Wikipedia::TemplateFiller->new()"
+  warn "ISBN lookups may be unavailable since isbndb_access_key was not provided to WWW::Wikipedia::TemplateFiller->new()"
     unless $attr{isbndb_access_key};
 
   return bless \%attr, $pkg;
@@ -130,6 +130,13 @@ sub __load_class {
 sub __to_classes {
   my( $pkg, $class_type, $which ) = @_;
 
+  # Asinine hack for Mac OS X's case-insensitive but case-preserving
+  # filesystem - 2009-01-29
+  if( $which ) {
+    $which = 'URL'  if $which =~ /^url$/i;
+    $which = 'ISBN' if $which =~ /^isbn$/i;
+  }
+
   $class_type = ucfirst lc $class_type;
   ( my $oneword = $which ) =~ s/\W/_/g;
 
@@ -159,8 +166,8 @@ now, however, ISBNdb is the only option. If you plan to use this
 module for querying book data, then you must supply an ISBNdb access
 key.
 
-There are two ways to provide an access key. The first is accomplished
-by passing a parameter to W::W::TF's new() method:
+There are multiple ways to provide an access key. The first is
+accomplished by passing a parameter to W::W::TF's new() method:
 
   use WWW::Wikipedia::TemplateFiller;
   my $tf = new WWW::Wikipedia::TemplateFiller(
@@ -172,20 +179,23 @@ For this, simply edit the C<%config> hash within the included web
 application instance script in cgi/index.cgi. The C<INSTALL> file
 provides more details.
 
-The third and final method is to assign the access key to an
-environment variable called C<ISBNDB_ACCESS_KEY>. This is accomplished
-something like this:
+The third method is to assign the access key to an environment
+variable called C<ISBNDB_ACCESS_KEY>. This is accomplished by doing
+something like this in your shell:
 
   $ export ISBNDB_ACCESS_KEY=your_access_key
 
-(This environment variable-based solution is the only way to test
-ISBNdb support during installation.)
+(Note that this environment variable-based solution is the only way to
+test ISBNdb support during installation.)
 
 =head1 AUTHOR
 
 David J. Iberri, C<< <diberri at cpan.org> >>
 
 =head1 BUGS
+
+The distinction between fill() and output() parameters is subtle and
+unnecessary. This will be resolved in a future release.
 
 Please report any bugs or feature requests to
 C<bug-www-wikipedia-templatefiller at rt.cpan.org>, or through the web

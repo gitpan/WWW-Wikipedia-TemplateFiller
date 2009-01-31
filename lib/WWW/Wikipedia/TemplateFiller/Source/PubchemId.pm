@@ -32,7 +32,7 @@ sub output {
   return $output;
 }
 
-sub template_name { 'chembox new' }
+sub template_name { 'chembox' }
 sub template_ref_name { 'chem'.shift->{pubchem_id} }
 sub template_basic_fields {
   my $self = shift;

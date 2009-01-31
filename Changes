@@ -1,5 +1,12 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.10
+date:    2009-01-29
+changes:
+  - (bug #42908) rename "chembox new" to "chembox"
+  - Ugly hack for Mac OS X's case-insensitive but case-preserving
+    filesystem
+
 version: 0.09
 date:    2008-11-25
 changes:

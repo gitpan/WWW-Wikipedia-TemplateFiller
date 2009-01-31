@@ -3,6 +3,13 @@ body { font-family: arial,sans-serif; font-size:12pt }
 h1 { font-size: 16pt }
 h2 { font-size: 14pt }
 
+#wrapper {
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccccff;
+  background: #eeeeff;
+}
+
 #error {
   padding: 3px;
   margin-bottom: 5px;

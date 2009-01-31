@@ -43,6 +43,7 @@ Sets up the app for L<CGI::Application>.
 
 sub setup {
   my $self = shift;
+  $self->error_mode( 'display_error' );
   $self->tmpl_path( $self->param('template_path') );
   $self->mode_param('f');
   $self->start_mode('view');
@@ -68,7 +69,7 @@ sub view_page {
   my $id = $q->param('id');
 
   my $error_message = '';
-  if( $type and !exists $self->keyed_data_sources->{ $type } ) {
+  if( $type and !$self->known_data_source($type) ) {
     $error_message = "No such template type.";
     $id = '';
   }
@@ -174,17 +175,26 @@ sub load_template {
   return $self->load_tmpl( $file, die_on_bad_params => 0, loop_context_vars => 1, cache => 1 );
 }
 
-=head2 keyed_data_sources
+=head2 known_data_source
 
-Returns data sources by key. Used in populating the "Data sources"
-section of the cgi/templates/start.html template.
+  my $bool = $self->known_data_source( $id_name );
+
+Returns true if C<$id_name> refers to a valid data source. For
+example, returns true if C<$id_name> is C<'pubmed_id'> but returns
+false if C<$id_name> is C<'something_else'>.
 
 =cut
 
-sub keyed_data_sources {
-  my %keyed;
+sub known_data_source {
+  my( $self, $source ) = @_;
+  return exists $self->_known_data_sources->{$source};
+}
 
-  foreach my $ds ( @{ shift->data_sources } ) {
+sub _known_data_sources {
+  my $self = shift;
+
+  my %keyed;
+  foreach my $ds ( @{ $self->data_sources } ) {
     $keyed{ $ds->{source} } = $ds;
   }
   
@@ -204,7 +214,7 @@ sub data_sources {
     { name => 'ISBN',              source => 'isbn',               template => 'cite_book',    example_id => '0721659446' },
     { name => 'PubMed ID',         source => 'pubmed_id',          template => 'cite_journal', example_id => '123455' },
     { name => 'PubMed Central ID', source => 'pubmedcentral_id',   template => 'cite_journal', example_id => '137841' },
-    { name => 'PubChem ID',        source => 'pubchem_id',         template => 'chembox_new',  example_id => '2244' },
+    { name => 'PubChem ID',        source => 'pubchem_id',         template => 'chembox',      example_id => '2244' },
     { name => 'URL',               source => 'url',                template => 'cite_web',     example_id => 'http://en.wikipedia.org' },
   ];
 }
@@ -271,6 +281,28 @@ sub checkbox_options {
   shift @options for 1..2;
 
   return \@options;
+}
+
+=head2 display_error
+
+Error-catching method called by L<CGI::Application> if a run mode
+fails for any reason. Displays a basic form with a styled error
+message up top.
+
+=cut
+
+sub display_error {
+  my( $self, $error ) = @_;
+
+  $error =~ s{(.*?) at \S+ line \d+\.}{$1.};
+  $error = ucfirst $error;
+
+  my $tmpl = $self->load_template( 'start.html' );
+  $tmpl->param(
+    error_message => $error
+  );
+
+  return $tmpl->output;
 }
 
 =head1 AUTHOR

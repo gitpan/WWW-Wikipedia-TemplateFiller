@@ -22,8 +22,7 @@ sub new {
 sub get {
   my( $self, $pmid ) = @_;
 
-  $self->{__search}->native_query($pmid);
-  my $article = $self->{__search}->next_result;
+  my $article = $self->_search($pmid);
 
   die "no article matches the given PubMed ID ($pmid)" unless $article;
 
