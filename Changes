@@ -1,5 +1,11 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.11
+date:    2009-02-20
+changes:
+  - add "add_iupac_name" fill-time option to PubchemId.pm (see
+    http://tinyurl.com/dm3hot)
+
 version: 0.10
 date:    2009-01-29
 changes:

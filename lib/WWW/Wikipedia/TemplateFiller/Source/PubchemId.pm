@@ -35,7 +35,7 @@ sub output {
 sub template_name { 'chembox' }
 sub template_ref_name { 'chem'.shift->{pubchem_id} }
 sub template_basic_fields {
-  my $self = shift;
+  my( $self, %opts ) = @_;
 
   ( my $formula_html = $self->{molecular_formula} ) =~ s{(\d+)}{<sub>$1</sub>}g;
 
@@ -43,12 +43,14 @@ sub template_basic_fields {
   %fields = (
     ImageFile => { value => '' },
     ImageSize => { value => '' },
-    IUPACName => { value => $self->{iupac_name} },
+    IUPACName => { value => '' },
     OtherNames => { value => '' },
     Section1 => { value => "{{Chembox Identifiers\n$EscapedPipe  CASNo=\n$EscapedPipe  PubChem=$self->{pubchem_id}\n$EscapedPipe  SMILES=$self->{smiles}\n  }}" },
     Section2 => { value => "{{Chembox Properties\n$EscapedPipe  Formula=$formula_html\n$EscapedPipe  MolarMass=$self->{molecular_weight}\n$EscapedPipe  Appearance=\n$EscapedPipe  Density=\n$EscapedPipe  MeltingPt=\n$EscapedPipe  BoilingPt=\n$EscapedPipe  Solubility=\n  }}" },
     Section3 => { value => "{{Chembox Hazards\n$EscapedPipe  MainHazards=\n$EscapedPipe  FlashPt=\n$EscapedPipe  Autoignition=\n  }}" },
   );
+
+  $fields{IUPACName} = { value => $self->{iupac_name} } if $opts{add_iupac_name};
 
   return \%fields;
 }

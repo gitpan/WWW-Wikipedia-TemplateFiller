@@ -71,7 +71,7 @@ is( $filler->get( URL => 'http://diberri.dyndns.org/uvm/tools/' )->fill->output(
 $source = $filler->get( pubchem_id => 12345 );
 is( $source->{iupac_name}, 'acetic acid acetoxymethyl ester', 'IUPACName match' );
 
-is( $filler->get( pubchem_id => 12345 )->fill->output( vertical => 1 ), '{{chembox
+is( $filler->get( pubchem_id => 12345 )->fill( add_iupac_name => 1 )->output( vertical => 1 ), '{{chembox
 |ImageFile=
 |ImageSize=
 |IUPACName=acetic acid acetoxymethyl ester
