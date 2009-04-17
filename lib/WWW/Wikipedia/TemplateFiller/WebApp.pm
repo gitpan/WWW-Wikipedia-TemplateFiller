@@ -255,6 +255,7 @@ sub params {
     add_text_url => 'Add URL (if available)',
     dont_strip_trailing_period => "Don't strip trailing period from article title",
     dont_use_etal => "Don't use <i>et al</i> for author list",
+    full_journal_title => 'Use full journal title',
     link_journal => 'Link journal title',
   );
 

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               WWW-Wikipedia-TemplateFiller
-version:            0.11
+version:            0.12
 abstract:           Fill Wikipedia templates with your eyes closed
 author:
     - David J. Iberri <diberri@cpan.org>
@@ -12,6 +12,7 @@ requires:
     Cache::SizeAwareFileCache:  0
     CGI::Application:     0
     Date::Calc:           0
+    Lingua::EN::Titlecase:  0
     Test::More:           0
     Tie::IxHash:          0
     WWW::Mechanize:       0

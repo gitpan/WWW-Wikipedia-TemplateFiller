@@ -2,7 +2,7 @@ package WWW::Wikipedia::TemplateFiller;
 use warnings;
 use strict;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use WWW::Search;
 use Cache::SizeAwareFileCache;

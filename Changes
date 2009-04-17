@@ -1,5 +1,17 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.12
+date:    2009-04-16
+changes:
+  - add "full_journal_title" fill-time option to PubmedId.pm
+    (requires Lingua::EN::Titlecase)
+  - suppress 'no isbndb_access_key provided' warning during 'make test'
+  - fix problem in which the journal 'Science' was expanded to the
+    aberration 'Science (journal)'
+  - only if 'link_journal' is enabled is 'Science' expanded to
+    'Science (journal)'. And even then, it is used to specify the
+    first portion of "[[Science (journal)|Science]]".
+
 version: 0.11
 date:    2009-02-20
 changes:

@@ -1,3 +1,4 @@
+
 body { font-family: arial,sans-serif; font-size:12pt }
 
 h1 { font-size: 16pt }
@@ -19,6 +20,7 @@ h2 { font-size: 14pt }
 
 #markup {
   border-top: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
 }
 
 #markup textarea {
@@ -26,10 +28,7 @@ h2 { font-size: 14pt }
   height: 15em;
 }
 
-#options.result {
-  float: left;
-  width: 30%;
-}
+#options.result { }
 
 #wrapper { }
 

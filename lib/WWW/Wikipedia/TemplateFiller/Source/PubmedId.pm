@@ -8,6 +8,7 @@ use Carp;
 use Date::Calc qw/ Month_to_Text Decode_Month /;
 use WWW::Search;
 use HTML::Entities;
+use Lingua::EN::Titlecase;
 
 my %Journals = (
   Science => 'Science (journal)',
@@ -62,10 +63,14 @@ sub _author_list {
 sub template_name { 'cite journal' }
 sub template_ref_name { 'pmid'.shift->{pmid} }
 sub template_basic_fields {
-  my $self = shift;
+  my( $self, %args ) = @_;
 
-  my $journal_title = $self->{journal_abbreviation};
-  $journal_title = $Journals{$journal_title} if exists $Journals{$journal_title};
+  my $journal_title = '';
+  if( $args{full_journal_title} ) {
+    $journal_title = Lingua::EN::Titlecase->new( $self->{journal} || '' )->title;
+  } else {
+    $journal_title = $self->{journal_abbreviation};
+  }
 
   my $pages = $self->{page};
   my $ndash = decode_entities('&ndash;');
@@ -100,17 +105,28 @@ sub template_basic_fields {
   return \%fields;
 }
 
+my %JournalLinks = (
+  'Science' => 'Science (journal)',
+);
+
 sub template_output_fields {
   my( $self, %args ) = @_;
 
   my $add_accessdate = exists $args{add_accessdate} ? $args{add_accessdate} : 1;
-  my $link_journal = $args{link_journal};
 
   tie( my %fields, 'Tie::IxHash' );
   $fields{accessdate} = { value => $self->__today_and_now } if $add_accessdate;
   $fields{url}        = { value => $self->{text_url} } if $args{add_text_url};
-  $fields{journal}    = { value => '[['.$self->{_basic_fields}->{journal}->{value}.']]' } if $args{link_journal};
   $fields{author}     = { value => $self->_author_list( $self->{_authors}, dont_use_etal => $args{dont_use_etal} ) };
+
+  if( $args{link_journal} ) {
+    my $journal_title = $self->{_basic_fields}->{journal}->{value};
+    if( my $link = $JournalLinks{$journal_title} ) {
+      $fields{journal} = { value => sprintf( '[[%s|%s]]', $link, $journal_title ) };
+    } else {
+      $fields{journal} = { value => sprintf( '[[%s]]', $journal_title ) };
+    }
+  }
 
   return \%fields;
 }

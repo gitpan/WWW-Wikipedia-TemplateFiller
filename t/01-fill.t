@@ -1,5 +1,5 @@
 #!perl -T
-use Test::More tests => 22;
+use Test::More tests => 23;
 
 BEGIN {
   use_ok( 'WWW::Wikipedia::TemplateFiller' );
@@ -10,7 +10,7 @@ use HTML::Entities;
 my $ndash = decode_entities('&ndash;');
 my $access_key = $ENV{ISBNDB_ACCESS_KEY};
 
-my $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $access_key );
+my $filler = new WWW::Wikipedia::TemplateFiller( isbndb_access_key => $access_key || 'No access key provided' );
 
 my $source;
 
@@ -23,9 +23,9 @@ $source = $filler->get( URL => 'http://news.bbc.co.uk/2/hi/business/7732733.stm'
 is( $source->fill->output( add_accessdate => 0 ), "{{cite web |url=http://news.bbc.co.uk/2/hi/business/7732733.stm |title=BBC NEWS &#124; Business &#124; Japanese economy now in recession |format= |work= |accessdate=}}", '(bug #41005) vertical pipes in HTML page titles' );
 
 $source = $filler->get( pubmed_id => '18535242' );
-is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, ''et al'' |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science (journal) |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
+is( $source->fill->output( add_accessdate => 0 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, ''et al'' |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
 
-is( $source->fill->output( add_accessdate => 0, dont_use_etal => 1 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, Shao L, Winoto L, Kner P, Burke B, Cardoso MC, Agard DA, Gustafsson MG, Leonhardt H, Sedat JW |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science (journal) |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
+is( $source->fill->output( add_accessdate => 0, dont_use_etal => 1 ), "{{cite journal |author=Schermelleh L, Carlton PM, Haase S, Shao L, Winoto L, Kner P, Burke B, Cardoso MC, Agard DA, Gustafsson MG, Leonhardt H, Sedat JW |title=Subdiffraction multicolor imaging of the nuclear periphery with 3D structured illumination microscopy |journal=Science |volume=320 |issue=5881 |pages=1332${ndash}6 |year=2008 |month=June |pmid=18535242 |doi=10.1126/science.1156947 |url=}}", 'dont_use_etal' );
 
 $source = $filler->get( URL => 'http://diberri.dyndns.org/perl/test/no-title.html' );
 is( $source->{title}, 'diberri.dyndns.org', 'title based on domain' );
@@ -41,6 +41,8 @@ if( $source->{pmc_id} ) {
 
 $source = $filler->get( pubmed_id => '12345' );
 is( $source->fill->output( add_accessdate => 0 ), '{{cite journal |author=Rubinstein MH |title=A new granulation method for compressed tablets [proceedings] |journal=J. Pharm. Pharmacol. |volume=28 Suppl |issue= |pages=67P |year=1976 |month=December |pmid=12345 |doi= |url=}}', 'expand month' );
+
+is( $source->fill( full_journal_title => 1 )->output( add_accessdate => 0 ), '{{cite journal |author=Rubinstein MH |title=A new granulation method for compressed tablets [proceedings] |journal=The Journal of Pharmacy and Pharmacology |volume=28 Suppl |issue= |pages=67P |year=1976 |month=December |pmid=12345 |doi= |url=}}', 'expand month' );
 
 $source = $filler->get( pubmed_id => '15841477' );
 is( $source->fill->output( link_journal => 1, add_accessdate => 0 ), "{{cite journal |author=Xu L, Liu SL, Zhang JT |title=(-)-Clausenamide potentiates synaptic transmission in the dentate gyrus of rats |journal=[[Chirality]] |volume=17 |issue=5 |pages=239${ndash}44 |year=2005 |month=May |pmid=15841477 |doi=10.1002/chir.20150 |url=}}", 'cite journal output' );

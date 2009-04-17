@@ -24,6 +24,7 @@ WriteMakefile(
         'WWW::Search::PubChem' => 0,
         'WWW::Search::PubMedLite' => 0.05, # pmc_id support/error handling
         'XML::Writer' => 0,
+        'Lingua::EN::Titlecase' => 0, # for 'full_journal_title' support
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'WWW-Wikipedia-TemplateFiller-*' },
