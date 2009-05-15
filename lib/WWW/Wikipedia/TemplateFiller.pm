@@ -2,7 +2,7 @@ package WWW::Wikipedia::TemplateFiller;
 use warnings;
 use strict;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use WWW::Search;
 use Cache::SizeAwareFileCache;
@@ -195,7 +195,11 @@ David J. Iberri, C<< <diberri at cpan.org> >>
 =head1 BUGS
 
 The distinction between fill() and output() parameters is subtle and
-unnecessary. This will be resolved in a future release.
+unnecessary. This will be resolved in a future release. In the
+meantime, if you find that specifying a parameter in the fill() method
+does not achieve the desired results (or has no effect at all), try
+specifying it in the output() method instead. And vice versa. I
+apologize for this gross aberration.
 
 Please report any bugs or feature requests to
 C<bug-www-wikipedia-templatefiller at rt.cpan.org>, or through the web

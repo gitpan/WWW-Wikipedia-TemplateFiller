@@ -35,7 +35,7 @@ sub get {
   my $lang = $article->{language_name} eq 'English' ? undef : $article->{language_name};
 
   my @authors = ref $article->{authors} ? @{ $article->{authors} } : ();
-  my $author_list = $self->_author_list( \@authors );
+  my $author_list = $self->_author_list( \@authors, dont_use_etal => 1 );
 
   for my $field ( qw/ title journal_abbreviation / ) {
     $article->{$field} =~ s/\=/encode_entities('&#61;')/ge;
@@ -52,11 +52,12 @@ sub get {
 
 sub _author_list {
   my( $self, $authors, %args ) = @_;
-  my $all_authors = join ', ', @$authors;
+  my @authors = ref $authors ? @$authors : split( /\s*,\s*/, $authors );
+  my $all_authors = join ', ', @authors;
   return $args{dont_use_etal}
     ? $all_authors
-    : @$authors > 6
-        ? join( ', ', @$authors[0..2] ) . ", ''et al''"
+    : @authors > 6
+        ? join( ', ', @authors[0..2] ) . ", ''et al.''"
         : $all_authors;
 }
 
@@ -92,15 +93,10 @@ sub template_basic_fields {
     month    => { value => $month,            show => 'if-filled' },
     pmid     => { value => $self->{pmid} },
     pmc      => { value => $self->{pmc_id},   show => 'if-filled' }, 
+    doi      => { value => $self->{doi} },
+    url      => { value => $self->{text_url} },
+    issn     => { value => '',                show => 'if-extended' },
   );
-
-  my $doi = $self->{doi};
-  my $url = $self->{text_url};
-  $url = '' if $doi;
-
-  $fields{doi} = { value => $doi };
-  $fields{url} = { value => $url };
-  $fields{issn} = { value => '', show => 'if-extended' };
 
   return \%fields;
 }
@@ -116,8 +112,8 @@ sub template_output_fields {
 
   tie( my %fields, 'Tie::IxHash' );
   $fields{accessdate} = { value => $self->__today_and_now } if $add_accessdate;
-  $fields{url}        = { value => $self->{text_url} } if $args{add_text_url};
-  $fields{author}     = { value => $self->_author_list( $self->{_authors}, dont_use_etal => $args{dont_use_etal} ) };
+  $fields{url}        = { value => '' } if ! $args{add_text_url} or ( $self->{doi} and $args{omit_url_if_doi_filled} );
+  $fields{author}     = { value => $self->_author_list( $self->{_basic_fields}->{author}->{value}, dont_use_etal => $args{dont_use_etal} ) };
 
   if( $args{link_journal} ) {
     my $journal_title = $self->{_basic_fields}->{journal}->{value};

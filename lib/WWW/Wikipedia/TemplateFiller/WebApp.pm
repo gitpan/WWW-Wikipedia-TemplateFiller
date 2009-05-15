@@ -187,18 +187,19 @@ false if C<$id_name> is C<'something_else'>.
 
 sub known_data_source {
   my( $self, $source ) = @_;
-  return exists $self->_known_data_sources->{$source};
+  return $self->_known_data_sources->{$source};
 }
 
 sub _known_data_sources {
   my $self = shift;
+  return $self->{_all_known_data_sources} if $self->{_all_known_data_sources};
 
   my %keyed;
   foreach my $ds ( @{ $self->data_sources } ) {
     $keyed{ $ds->{source} } = $ds;
   }
   
-  return \%keyed;
+  $self->{_all_known_data_sources} = \%keyed;
 }
 
 =head2 data_sources
@@ -242,24 +243,59 @@ Returns all known parameters and their labels.
 =cut
 
 sub params {
+  my $self = shift;
+
   tie( my %params, 'Tie::IxHash' );
 
-  %params = (
-    type => 0,
-    id => '',
-    vertical => 'Fill vertically',
-    extended => 'Show extended fields',
-    add_param_space => 'Pad parameter names and values',
-    add_accessdate => 'Add access date (if relevant)',
-    add_ref_tag => 'Add ref tag',
-    add_text_url => 'Add URL (if available)',
-    dont_strip_trailing_period => "Don't strip trailing period from article title",
-    dont_use_etal => "Don't use <i>et al</i> for author list",
-    full_journal_title => 'Use full journal title',
-    link_journal => 'Link journal title',
-  );
+  my $param_groups = $self->_params;
+  foreach my $g ( @$param_groups ) {
+    my $group = $g->{group};   # scalar
+    my $params = $g->{params}; # arrayref
+    
+    for( my $i = 0; $i < @$params; $i+=2 ) {
+      my( $param, $param_spec ) = ( $params->[$i], $params->[$i+1] );
+      $params{$param} = $param_spec->{label};
+    }
+  }
 
   return \%params;
+}
+
+# A sensible data structure for parameters, but not particularly
+# useful at present.
+sub _params {
+  my @param_groups = (
+    {
+      group => 'basic',
+      params => [
+        type            => { label => undef },
+        id              => { label => undef },
+
+        vertical        => { label => 'Fill vertically' },
+        extended        => { label => 'Show extended fields' },
+        add_param_space => { label => 'Pad parameter names and values' },
+      ]
+    },
+
+    {
+      group => 'pubmed_id',
+      params => [
+        add_ref_tag                => { label => 'Add ref tag' },
+        dont_use_etal              => { label => "Don't use <i>et al.</i> for author list" },
+
+        omit_url_if_doi_filled     => { label => 'Omit URL field if DOI field is populated (journals only)' },
+        dont_strip_trailing_period => { label => "Don't strip trailing period from article title" },
+
+        full_journal_title         => { label => 'Use full journal title' },
+        link_journal               => { label => 'Link journal title' },
+
+        add_text_url               => { label => 'Add URL (if available)' },
+        add_accessdate             => { label => 'Add access date (if relevant)' },
+      ]
+    },
+  );
+
+  return \@param_groups;
 }
 
 =head2 checkbox_options
@@ -279,6 +315,7 @@ sub checkbox_options {
     push @options, { name => $p, value => 1, checked => $qp{$p}, id => $p, label => $params->{$p} };
   }
 
+  # Remove 'type' and 'id'
   shift @options for 1..2;
 
   return \@options;
@@ -293,9 +330,9 @@ message up top.
 =cut
 
 sub display_error {
-  my( $self, $error ) = @_;
+  my( $self, $raw_error ) = @_;
 
-  $error =~ s{(.*?) at \S+ line \d+\.}{$1.};
+  ( my $error = $raw_error ) =~ s{(.*?) at \S+ line \d+\.}{$1.};
   $error = ucfirst $error;
 
   my $tmpl = $self->load_template( 'start.html' );

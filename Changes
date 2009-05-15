@@ -1,5 +1,14 @@
 # Revision history for WWW-Wikipedia-TemplateFiller
 
+version: 0.13
+date:    2009-05-14
+changes:n
+  - shifting more parameters to output()-time in PubmedId.pm
+  - add "omit_url_if_doi_filled" parameter in PubmedId.pm
+  - add missing period to "et al." in PubmedId.pm
+  - improved (but currently unused) data structure for parameters in
+    WebApp.pm
+
 version: 0.12
 date:    2009-04-16
 changes:
